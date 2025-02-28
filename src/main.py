@@ -8,7 +8,7 @@ def main():
     node2 = TextNode("This is a text node", 
                      TextType.LINK, 
                      "https://www.boot.dev)")
-    node3 = TextNode("This is bold text", TextType.BOLD_TEXT)
+    node3 = TextNode("This is bold text", TextType.BOLD)
     
     print(repr(node1))
     print(repr(node2))
