@@ -1,0 +1,1 @@
+Project from Boot.dev to generate a static site.
