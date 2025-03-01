@@ -1,4 +1,5 @@
 from textnode import TextNode, TextType
+from htmlnode import HTMLNode
 
 
 def main():
@@ -15,6 +16,16 @@ def main():
     print(repr(node3))
     print(node1 == node2)
     print(node1 == node3)
+    
+    node_html = HTMLNode("p",
+                        "This is a html node",
+                        None,
+                        {
+                            "href": "https://www.google.com",
+                            "target": "_blank"
+                        }
+                        )
+    print(repr(node_html))
     
 
 
