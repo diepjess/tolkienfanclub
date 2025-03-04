@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -81,6 +81,95 @@ class TestLeafNode(unittest.TestCase):
     def test_repr(self):
         node = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
         self.assertEqual(repr(node), "LeafNode(a, Click me!, {'href': 'https://www.google.com'})")
+
+
+class TestParentNode(unittest.TestCase):
+    def test_repr(self):
+        parent_node = ParentNode("div", [LeafNode("span", "child")])
+        test_string = 'ParentNode(div, [LeafNode(span, child, None)], None)'
+        self.assertEqual(repr(parent_node), test_string)
+    
+    def test_to_html_with_child(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+    
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        child_node2 = LeafNode("p", "child2", {"href": "link"})
+        child_node3 = LeafNode(None, "Normal")
+        parent_node = ParentNode("div", [child_node, child_node2, child_node3])
+        test_string = '<div><span>child</span><p href="link">child2</p>Normal</div>'
+        self.assertEqual(parent_node.to_html(), test_string)
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node_1 = ParentNode("span", [grandchild_node])
+        child_node_2 = LeafNode("em", "Italic")
+        parent_node = ParentNode("div", [child_node_1, child_node_2])
+        test_string = "<div><span><b>grandchild</b></span><em>Italic</em></div>"
+        self.assertEqual(parent_node.to_html(), test_string)
+    
+    def test_to_html_invalid_children(self):
+        with self.assertRaises(TypeError) as context:
+            parent = ParentNode("div", ["text"])
+            parent.to_html()
+            self.assertEqual(str(context), "All children must be instances of HTMLNode")
+    
+    def test_to_html_no_tag(self):
+        child_node = LeafNode("span", "child")
+        parent = ParentNode("div", [child_node])
+        with self.assertRaises(ValueError) as context:
+            parent.tag = None
+            parent.to_html()
+            self.assertEqual(str(context), "ParentNode must have a tag")
+    
+    def test_to_html_no_children(self):
+        child_node = LeafNode("span", "child")
+        parent = ParentNode("div", [child_node])
+        with self.assertRaises(ValueError) as context:
+            parent.children = None
+            parent.to_html()
+            self.assertEqual(str(context), "ParentNode must have at least one child")
+    
+    def test_to_html_empty_children(self):
+        child_node = LeafNode("span", "child")
+        parent = ParentNode("div", [child_node])
+        with self.assertRaises(ValueError) as context:
+            parent.children = []
+            parent.to_html()
+            self.assertEqual(str(context), "ParentNode must have at least one child")
+    
+    def test_no_tags(self):
+        with self.assertRaises(ValueError) as context:
+            child_node = LeafNode("span", "child")
+            parent = ParentNode(None, [child_node])
+            self.assertEqual(str(context), "ParentNode must have a tag")
+    
+    def test_no_children(self):
+        with self.assertRaises(ValueError) as context:
+            parent = ParentNode("div", None)
+            self.assertEqual(str(context), "ParentNode must have at least one child")
+
+    def test_empty_childen(self):
+        with self.assertRaises(ValueError) as context:
+            parent = ParentNode("div", [])
+            self.assertEqual(str(context), "ParentNode must have at least one child")
+
+    def test_headings(self):
+        node = ParentNode(
+            "h2",
+            [
+                LeafNode("b", "Bold text"),
+                LeafNode(None, "Normal text"),
+                LeafNode("i", "italic text"),
+                LeafNode(None, "Normal text"),
+            ],
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<h2><b>Bold text</b>Normal text<i>italic text</i>Normal text</h2>",
+        )
 
 
 if __name__ == "__main__":
