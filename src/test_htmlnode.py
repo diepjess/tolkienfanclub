@@ -64,11 +64,27 @@ class TestLeafNode(unittest.TestCase):
     def test_leaf_node_no_value(self):
         with self.assertRaises(ValueError) as context:
             node = LeafNode("html", None)
-            self.assertEqual(str(context.exception), "LeafNode must have a value")
+            self.assertEqual(str(context), "LeafNode must have a value")
+
+    def test_leaf_node_rejects_children_in_constructor(self):
+        with self.assertRaises(TypeError):
+            node = LeafNode("p", "paragraph", children=["some child"])
+
+    def test_leaf_node_cannot_add_children(self):
+        node = LeafNode("p", "paragraph")
+        with self.assertRaises(ValueError) as context:
+            node.children = ["some child"]
+            self.assertEqual(str(context), "LeafNode cannot have children")
 
     def test_leaf_to_html_no_tag(self):
         node = LeafNode(None, "This is raw text")
         self.assertEqual(node.to_html(), "This is raw text")
+        
+    def test_leaf_to_html_no_vale(self):
+        node = LeafNode("p")
+        node_2 = LeafNode("div", "")
+        self.assertEqual(node.to_html(), "<p></p>")
+        self.assertEqual(node_2.to_html(), "<div></div>")
     
     def test_leaf_to_html_p(self):
         node = LeafNode("p", "Hello, world!")

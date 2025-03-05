@@ -25,14 +25,19 @@ class HTMLNode:
 
 
 class LeafNode(HTMLNode):
-    def __init__(self, tag, value, props=None):
+    def __init__(self, tag=None, value="", props=None):
         if value is None:
             raise ValueError("LeafNode must have a value")
 
-        super().__init__(tag, children=None, props=props)
-        self.value = value
+        super().__init__(tag, value, None, props)
         
-        if self.children is not None:
+    @property
+    def children(self):
+        return None
+    
+    @children.setter
+    def children(self, new_value):
+        if new_value is not None:
             raise ValueError("LeafNode cannot have children")
     
     def to_html(self):
