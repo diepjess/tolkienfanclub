@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_parser import split_nodes_delimiter, extract_markdown_images
+from markdown_parser import split_nodes_delimiter, extract_markdown_images, extract_markdown_links
 from textnode import TextNode, TextType
 
 
@@ -158,6 +158,43 @@ class TestExtractMarkdownImage(unittest.TestCase):
         text = "This is text with a [link](urllink) and ![image](image.png)"
         matches = extract_markdown_images(text)
         self.assertListEqual(matches, [("image", "image.png")])
+
+
+class TestExtractMarkdownLink(unittest.TestCase):
+    def test_extract_markdown_link(self):
+        text = "This is text with a [link](https://boot.dev)"
+        matches = extract_markdown_links(text)
+        self.assertListEqual(
+            matches,
+            [("link", "https://boot.dev")], 
+        )
+    
+    def test_extract_multi_markdown_link(self):
+        text = "This is text with a [link](https://boot.dev) and [other](https://google.com)"
+        matches = extract_markdown_links(text)
+        self.assertListEqual(
+            matches,
+            [
+                ("link", "https://boot.dev"),
+                ("other", "https://google.com"),
+            ]
+        )
+    
+    def test_extract_plain_text(self):
+        self.assertListEqual([], extract_markdown_links("No images here!"))
+    
+    def test_extract_empty_text(self):
+        self.assertListEqual([], extract_markdown_links(""))
+    
+    def test_extract_link_special_chars(self):
+        text = "[My cool link!](https://example.com/img?id=123&size=large)"
+        expected = [("My cool link!", "https://example.com/img?id=123&size=large")]
+        self.assertListEqual(expected, extract_markdown_links(text))
+    
+    def test_extract_mixed_content(self):
+        text = "This is text with a [link](urllink) and ![image](image.png)"
+        matches = extract_markdown_links(text)
+        self.assertListEqual(matches, [("link", "urllink")])
 
 
 if __name__ == "__main__":
