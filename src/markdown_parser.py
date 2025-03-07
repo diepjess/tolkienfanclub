@@ -12,7 +12,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type: TextType):
 
     Raises:
         TypeError: Invalid text_types
-        Exception: Delimiter with no closing delimiter is unsupported.
+        ValueError: Delimiter with no closing delimiter is unsupported.
 
     Returns:
         list: Objects, TextNodes, and TextNodes that have been split.
@@ -37,7 +37,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type: TextType):
                 rest = parts[1]
                 
                 if delimiter not in rest:
-                    raise Exception(f"Closing delimiter not found for {delimiter}")
+                    raise  ValueError(f"Closing delimiter not found for {delimiter}")
                     
                 inner_parts = rest.split(delimiter, maxsplit=1)
                 inner = inner_parts[0]
