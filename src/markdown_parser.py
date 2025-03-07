@@ -66,12 +66,24 @@ def extract_markdown_images(text):
     """Extract image alt text and link from markdown text
 
     Args:
-        text (str): Maybe contain markdown images
+        text (str): Maybe contains markdown images
 
     Returns:
         list: Tuple of ("alt text", "image link")
     """
-    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    pattern = r"!\[(.*?)\]\((.*?)\)"
+    matches = re.findall(pattern, text)
+    return matches
 
 def extract_markdown_links(text):
-    return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)", text)
+    """Extract link text and link from markdown text
+
+    Args:
+        text (str): Maybe contains markdown links
+
+    Returns:
+        list: Tuple of ("link text", "link")
+    """
+    pattern = r"(?<!!)\[(.*?)\]\((.*?)\)"
+    matches = re.findall(pattern, text)
+    return matches
