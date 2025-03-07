@@ -1,6 +1,6 @@
 import unittest
 
-from markdown_parser import split_nodes_delimiter
+from markdown_parser import split_nodes_delimiter, extract_markdown_images
 from textnode import TextNode, TextType
 
 
@@ -120,6 +120,44 @@ class TestSplitNodesDelimiter(unittest.TestCase):
     def test_empty_node_list(self):
         result =  split_nodes_delimiter([], "_", TextType.ITALIC)
         self.assertEqual(len(result), 0)
+
+
+class TestExtractMarkdownImage(unittest.TestCase):
+    def test_extract_markdown_images(self):
+        text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        matches = extract_markdown_images(text)
+        self.assertListEqual(
+            matches,
+            [("image", "https://i.imgur.com/zjjcJKZ.png")], 
+        )
+    
+    def test_extract_multi_markdown_images(self):
+        text = "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        text += ". This is some more ![image2](image.jpeg)"
+        matches = extract_markdown_images(text)
+        self.assertListEqual(
+            matches,
+            [
+                ("image", "https://i.imgur.com/zjjcJKZ.png"),
+                ("image2", "image.jpeg"),
+            ]
+        )
+    
+    def test_extract_plain_text(self):
+        self.assertListEqual([], extract_markdown_images("No images here!"))
+    
+    def test_extract_empty_text(self):
+        self.assertListEqual([], extract_markdown_images(""))
+    
+    def test_extract_image_special_chars(self):
+        text = "![My cool image!](https://example.com/img?id=123&size=large)"
+        expected = [("My cool image!", "https://example.com/img?id=123&size=large")]
+        self.assertListEqual(expected, extract_markdown_images(text))
+    
+    def test_extract_mixed_content(self):
+        text = "This is text with a [link](urllink) and ![image](image.png)"
+        matches = extract_markdown_images(text)
+        self.assertListEqual(matches, [("image", "image.png")])
 
 
 if __name__ == "__main__":
