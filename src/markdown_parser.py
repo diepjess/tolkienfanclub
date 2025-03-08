@@ -62,6 +62,39 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type: TextType):
     return result_nodes
 
 
+def split_nodes_image(old_nodes):
+    result_nodes = []
+    for old_node in old_nodes:
+        if not isinstance(old_node, TextNode):
+            # for now preserve Non-TextNode ojbects as is
+            result_nodes.append(old_node)
+            continue
+        images = extract_markdown_images(old_node.text)
+        if len(images) == 0:
+            result_nodes.append(old_node)
+        else:
+            current_text = old_node.text
+            for image in images:
+                image_alt = image[0]
+                image_link = image[1]
+                sections = current_text.split(f"![{image_alt}]({image_link})", maxsplit=1)
+                before = sections[0]
+                after = sections[1]
+                # design decision to not create empty TextNodes
+                if before:
+                    result_nodes.append(TextNode(before, TextType.TEXT))
+                
+                result_nodes.append(TextNode(image_alt, TextType.IMAGE, image_link))
+                
+                current_text = after
+            
+            # design decision to not create empty TextNodes
+            if current_text:
+                result_nodes.append(TextNode(current_text, TextType.TEXT))
+    
+    return result_nodes
+
+
 def extract_markdown_images(text):
     """Extract image alt text and link from markdown text
 
